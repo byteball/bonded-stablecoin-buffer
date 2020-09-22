@@ -81,13 +81,13 @@ async function payCompensations() {
 	const orders = await db.query("SELECT orders.*, address FROM orders LEFT JOIN buffer_addresses USING(buffer_address) WHERE provider='simpleswap' AND is_done=1 AND is_eligible=1 AND is_compensated=0");
 	for (let order of orders) {
 		const compensation_amount_in_bytes = Math.floor(order.compensation * 1e9);
-		const unit = await dag.sendPayment({ to_address: order.address, amount: compensation_amount_in_bytes });
+		const unit = await dag.sendPayment({ to_address: order.buffer_address, amount: compensation_amount_in_bytes });
 		if (unit) {
-			console.log(`sent ${order.compensation} GB compensation to ${order.address} for order ${order.order_id}`);
+			console.log(`sent ${order.compensation} GB compensation to user ${order.address} buffer ${order.buffer_address} for order ${order.order_id}`);
 			await db.query("UPDATE orders SET is_compensated=1, compensation_unit=?, compensation_date=" + db.getNow() + " WHERE order_id=?", [unit, order.order_id]);
 		}
 		else
-			console.log(`failed to send ${order.compensation} GB compensation to ${order.address} for order ${order.order_id}`);
+			console.log(`failed to send ${order.compensation} GB compensation to user ${order.address} buffer ${order.buffer_address} for order ${order.order_id}`);
 	}
 	unlock();
 }
