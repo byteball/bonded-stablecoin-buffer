@@ -1,0 +1,104 @@
+{
+	doc_url: "https://ostable.org/bonded-stablecoin-buffer.json",
+	init: `{
+		if (trigger.output[[asset!=base]])
+			bounce("only bytes payments are accepted");
+		if (!is_aa(params.curve_aa))
+			bounce("bad curve_aa");
+		if (!is_valid_address(params.address))
+			bounce("bad address");
+		$max_fee_percent = params.max_fee_percent OTHERWISE 1;
+		if (typeof($max_fee_percent) != 'number')
+			bounce("bad max_fee_percent");
+		$max_change_percent = params.max_change_percent OTHERWISE 0.5;
+		if (typeof($max_change_percent) != 'number')
+			bounce("bad max_change_percent");
+	}`,
+	messages: {
+		cases: [
+
+			{
+				if: `{ trigger.data.execute }`,
+				init: `{
+					$tokens2 = trigger.data.tokens2;
+					if (!is_integer($tokens2) OR $tokens2 <= 0)
+						bounce("bad tokens2");
+					if (balance[base] <= 1e5)
+						bounce("buffer balance is too low");
+				}`,
+				messages: [
+					{
+						app: 'payment',
+						payload: {
+							asset: `base`,
+							outputs: [
+								{address: "{params.curve_aa}", }
+							]
+						}
+					},
+					{
+						app: 'data',
+						payload: {
+							tokens2_to: `{params.address}`,
+							max_fee_percent: `{$max_fee_percent}`,
+							tokens2: `{$tokens2}`,
+						}
+					},
+					{
+						app: 'state',
+						state: `{
+							var['executing_at'] = mci;
+							var['sent'] = balance[base];
+						}`
+					},
+					
+				]
+			},
+
+			// accept the change (if any) from the curve AA
+			{
+				if: `{trigger.address == params.curve_aa AND var['executing_at'] == mci}`,
+				init: `{
+					$amount = trigger.output[[asset=base]];
+					// if the change is less than max_change_percent % of the purchase amount, send it to the user.
+					// Otherwise, the remaining bytes can be used to buy more tokens2
+					$bSendBytes = ($amount >= 1000 AND $amount <= max($max_change_percent/100 * var['sent'], 1e5));
+				}`,
+				messages: [
+					{
+						if: '{$bSendBytes}',
+						app: 'payment',
+						payload: {
+							asset: `base`,
+							outputs: [
+								{address: "{params.address}", }
+							]
+						}
+					},
+					{
+						app: 'state',
+						state: `{
+							var['executing_at'] = false;
+							var['sent'] = false;
+							response['message'] = $bSendBytes ? "Done" : "Amount left: " || $amount;
+						}`
+					},
+				]
+			},
+
+			// silently accept coins
+			{
+				messages: [
+					{
+						app: 'state',
+						state: `{
+							// do nothing
+						}`
+					},
+				]
+			},
+
+
+		]
+	}
+}

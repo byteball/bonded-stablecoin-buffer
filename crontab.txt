@@ -1,0 +1,1 @@
+*/20 * * * * cd bonded-stablecoin-buffer; node check_daemon.js 1>>~/.config/bonded-stablecoin-buffer/check_daemon.log 2>>~/.config/bonded-stablecoin-buffer/check_daemon.err
