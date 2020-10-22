@@ -18,8 +18,8 @@ const fetchExchangeRate = async (in_currency) => {
 		in_currency = 'USDT';
 	const response = await request(`/data/price?fsym=${in_currency}&tsyms=GBYTE`)
 
-	console.error(JSON.stringify(response, null, 2))
-	console.error('ok', response.ok)
+//	console.error(JSON.stringify(response, null, 2))
+//	console.error('ok', response.ok)
 
 	if (!response.ok) {
 		const error = await response.text()

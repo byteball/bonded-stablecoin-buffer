@@ -39,8 +39,8 @@ const createExchange = async (amount, currency_from, address_to) => {
 const fetchExchangeInfo = async (id) => {
 	const response = await request(`/get_exchange?api_key=${conf.simpleswapApiKey}&id=${id}`)
 
-	console.error(JSON.stringify(response, null, 2))
-	console.error('ok', response.ok)
+//	console.error(JSON.stringify(response, null, 2))
+//	console.error('ok', response.ok)
 
 	if (!response.ok) {
 		const error = await response.text()
