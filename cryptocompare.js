@@ -14,6 +14,8 @@ const request = (endpoint, options) => {
 }
 
 const fetchExchangeRate = async (in_currency) => {
+	if (in_currency === 'USDTERC20' || in_currency === 'USDTTRC20')
+		in_currency = 'USDT';
 	const response = await request(`/data/price?fsym=${in_currency}&tsyms=GBYTE`)
 
 	console.error(JSON.stringify(response, null, 2))
@@ -27,7 +29,7 @@ const fetchExchangeRate = async (in_currency) => {
 
 	const data = await response.json()
 	if (!data.GBYTE)
-		throw new Error(`no GBYTE in response ${data}`);
+		throw new Error(`no GBYTE in response ${JSON.stringify(data)}`);
 	return data.GBYTE
 }
 
