@@ -41,7 +41,7 @@ exports.welcomeBytesAmount = 1e5;
 exports.simpleswapApiKey = '';
 
 exports.target_fee = 1; // 1%: we compensate to reduce the final fee to this value
-exports.max_compensation = 5; // 5%: we never compensate more
+exports.max_compensation = 10; // 10%: we never compensate more
 exports.daily_compensation_quota = 10; // GB
 
 console.log('finished buffer conf');
