@@ -75,7 +75,7 @@ async function validateCurveAA(curve_aa) {
 	const row = rows[0];
 	if (!row)
 		return "not an AA";
-	if (row.base_aa !== conf.curve_base_aa)
+	if (!conf.curve_base_aas.includes(row.base_aa))
 		return "wrong AA";
 	const params = JSON.parse(row.definition)[1].params;
 	const reserve_asset = params.reserve_asset || 'base';
@@ -223,7 +223,7 @@ async function onAARequest(objAARequest) {
 
 
 async function startWatching() {
-	await aa_addresses.readAADefinitions([conf.curve_base_aa]);
+	await aa_addresses.readAADefinitions(conf.curve_base_aas);
 	await aa_addresses.readAADefinitions([conf.buffer_base_aa]);
 	await aa_addresses.readAADefinitions([conf.arb_base_aa]);
 	

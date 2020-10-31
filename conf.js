@@ -32,7 +32,7 @@ exports.bNoPassphrase = false;
 exports.explicitStart = true;
 
 exports.buffer_base_aa = 'VXY4L4NGFQ773NOQKUFFVJEWLZUBCYHI';
-exports.curve_base_aa = 'FCFYMFIOGS363RLDLEWIDBIIBU7M7BHP';
+exports.curve_base_aas = ['FCFYMFIOGS363RLDLEWIDBIIBU7M7BHP', '3RNNDX57C36E76JLG2KAQSIASAYVGAYG'];
 exports.arb_base_aa = '7DTJZNB3MHSBVI72CKXRIKONJYBV7I2Z';
 
 exports.webPort = process.env.testnet ? 8081 : 8080;
