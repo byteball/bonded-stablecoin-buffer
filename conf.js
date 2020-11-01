@@ -35,7 +35,13 @@ exports.buffer_base_aa = 'VXY4L4NGFQ773NOQKUFFVJEWLZUBCYHI';
 exports.curve_base_aas = ['FCFYMFIOGS363RLDLEWIDBIIBU7M7BHP', '3RNNDX57C36E76JLG2KAQSIASAYVGAYG'];
 exports.arb_base_aa = '7DTJZNB3MHSBVI72CKXRIKONJYBV7I2Z';
 
+exports.governance_base_aas = ['Y4VBXMROK5BWBKSYYAMUW7QUEZFXYBCF', 'UUPBIWDWQ7Q4WXS5CWSEKUQE34FG6L55'];
+exports.deposit_base_aa = 'GEZGVY4T3LK6N4NJAKNHNQIVAI5OYHPC';
+
 exports.webPort = process.env.testnet ? 8081 : 8080;
+exports.wsPort = process.env.testnet ? 8091 : 8090;
+
+exports.MAX_STATE_CONNECTIONS = 1000;
 
 exports.welcomeBytesAmount = 1e5;
 exports.simpleswapApiKey = '';
