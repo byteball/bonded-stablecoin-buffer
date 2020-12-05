@@ -225,7 +225,7 @@ async function onAARequest(objAARequest) {
 async function startWatching() {
 	await aa_addresses.readAADefinitions(conf.curve_base_aas);
 	await aa_addresses.readAADefinitions([conf.buffer_base_aa]);
-	await aa_addresses.readAADefinitions([conf.arb_base_aa]);
+	await aa_addresses.readAADefinitions(conf.arb_base_aas);
 	
 	eventBus.on("aa_request_applied", onAARequest);
 	eventBus.on("aa_response_applied", onAAResponse);
@@ -238,7 +238,7 @@ async function startWatching() {
 	};
 
 	// watch arb AAs
-	const arb_rows = await dag.getAAsByBaseAAs(conf.arb_base_aa);
+	const arb_rows = await dag.getAAsByBaseAAs(conf.arb_base_aas);
 	for (let row of arb_rows) {
 		const curve_aa = row.definition[1].params.curve_aa;
 		if (!curves[curve_aa]) // not on any of our curves?
