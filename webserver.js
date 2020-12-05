@@ -10,6 +10,7 @@ const ValidationUtils = require('ocore/validation_utils.js');
 const conf = require('ocore/conf.js');
 const buffer = require('./buffer.js');
 const orders = require('./orders.js');
+const cryptocoinpro = require('./cryptocoinpro.js');
 
 const app = new Koa();
 const router = new KoaRouter();
@@ -78,6 +79,22 @@ router.post('/create_order', async (ctx) => {
 	catch (err) {
 		setError(ctx, err);
 	}
+});
+
+router.post('/create_fiat_redirect_url', async (ctx) => {
+	const data = ctx.request.data;
+	console.error('create_fiat_redirect_url ctx', JSON.stringify(ctx, null, 2));
+	console.error('create_fiat_redirect_url', data);
+	const err = cryptocoinpro.getRequestError(data);
+	if (err)
+		return setError(ctx, err);
+	if (!await buffer.getBuffer(data.buffer_address))
+		return setError(ctx, "no such buffer");
+	const url = cryptocoinpro.createCheckoutUrl(data);
+	ctx.body = {
+		status: 'success',
+		data: url,
+	};
 });
 
 app.use(cors());
