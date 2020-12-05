@@ -41,6 +41,8 @@ exports.deposit_base_aa = 'GEZGVY4T3LK6N4NJAKNHNQIVAI5OYHPC';
 exports.webPort = process.env.testnet ? 8081 : 8080;
 exports.wsPort = process.env.testnet ? 8091 : 8090;
 
+exports.cryptoCoinProCheckoutUrl = process.env.testnet ? 'https://dev-checkout.infra.cryptocoin.pro' : 'https://checkout.cryptocoin.pro';
+
 exports.MAX_STATE_CONNECTIONS = 1000;
 
 exports.welcomeBytesAmount = 1e5;

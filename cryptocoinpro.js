@@ -78,7 +78,7 @@ function createCheckoutUrl(data) {
 	console.log(payload)
 	const token = jwt.sign(payload, privateKey, { algorithm: 'RS512' });
 	console.log({ token });
-	const url = `https://dev-checkout.infra.cryptocoin.pro/?lang=en&display=light&landing=false&platform=${conf.cryptoCoinProPlatform}&token=${token}`;
+	const url = `${conf.cryptoCoinProCheckoutUrl}/?lang=en&display=light&landing=false&platform=${conf.cryptoCoinProPlatform}&token=${token}`;
 	return url;
 }
 
@@ -115,7 +115,7 @@ async function test() {
 	console.log(url);
 //	await authenticate();
 }
-test();
+//test();
 
 exports.getRequestError = getRequestError;
 exports.createCheckoutUrl = createCheckoutUrl;
