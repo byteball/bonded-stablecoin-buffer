@@ -5,6 +5,7 @@ const db = require('ocore/db.js');
 const conf = require('ocore/conf.js');
 const mutex = require('ocore/mutex.js');
 const simpleswap = require('./simpleswap.js');
+const oswapcc = require('./oswapcc.js');
 const cryptocompare = require('./cryptocompare.js');
 const dag = require('aabot/dag.js');
 
@@ -16,12 +17,35 @@ async function getExpectedCompensation(amount_in, currency_in, amount_out) {
 	return { eligible: true, compensation };
 }
 
+function addFields(provider, order_info) {
+	if (provider === 'oswapcc') {
+		order_info.address_to = order_info.out_address;
+		order_info.currency_from = order_info.in_coin;
+		order_info.amount_from = order_info.in_amount;
+		order_info.amount_to = order_info.expected_out_amount;
+	}
+}
+
+function isFinished(provider, order_info) {
+	if (provider === 'simpleswap')
+		return (order_info.status === 'finished' || order_info.status === 'sending');
+	if (provider === 'oswapcc')
+		return (order_info.status === 'sent');
+	throw Error(`unknown provider ` + provider);
+}
+
 async function createOrder(order) {
 	let is_eligible = (await isEligible()) ? 1 : 0;
-	if (order.provider !== 'simpleswap')
+	let provider_api;
+	if (order.provider === 'simpleswap')
+		provider_api = simpleswap;
+	else if (order.provider === 'oswapcc')
+		provider_api = oswapcc;
+	else
 		throw Error("wrong provider: " + order.provider);
 	order.currency_in = order.currency_in.toUpperCase();
-	let order_info = await simpleswap.fetchExchangeInfo(order.provider_id);
+	let order_info = await provider_api.fetchExchangeInfo(order.provider_id);
+	addFields(order.provider, order_info);
 	if (order.buffer_address !== order_info.address_to)
 		throw Error(`dest address doesn't match ${order.buffer_address} !== ${order_info.address_to}`); 
 	if (order.currency_in !== order_info.currency_from.toUpperCase())
@@ -42,18 +66,26 @@ async function createOrder(order) {
 }
 
 async function finishOrders(buffer_address) {
-	const orders = await db.query("SELECT * FROM orders WHERE provider='simpleswap' AND is_done=0 " + (buffer_address ? "AND buffer_address=" + db.escape(buffer_address) : ""));
+	const orders = await db.query("SELECT * FROM orders WHERE provider IN('simpleswap', 'oswapcc') AND is_done=0 " + (buffer_address ? "AND buffer_address=" + db.escape(buffer_address) : ""));
 	let count = 0;
 	for (let order of orders) {
+		let provider_api;
+		if (order.provider === 'simpleswap')
+			provider_api = simpleswap;
+		else if (order.provider === 'oswapcc')
+			provider_api = oswapcc;
+		else
+			throw Error("wrong provider: " + order.provider);
 		let order_info;
 		try {
-			order_info = await simpleswap.fetchExchangeInfo(order.provider_id);
+			order_info = await provider_api.fetchExchangeInfo(order.provider_id);
 		}
 		catch (e) {
 			console.log(`fetching order ${order.provider_id} failed`, e);
 			continue;
 		}
-		if (order_info.status !== 'finished' && order_info.status !== 'sending')
+		addFields(order.provider, order_info);
+		if (!isFinished(order.provider, order_info))
 			continue;
 		order_info.amount_from = parseFloat(order_info.amount_from);
 		order_info.amount_to = parseFloat(order_info.amount_to);
@@ -78,7 +110,7 @@ async function finishOrders(buffer_address) {
 
 async function payCompensations() {
 	const unlock = await mutex.lock('payCompensations');
-	const orders = await db.query("SELECT orders.*, address, in_work FROM orders LEFT JOIN buffer_addresses USING(buffer_address) WHERE provider='simpleswap' AND is_done=1 AND is_eligible=1 AND is_compensated=0");
+	const orders = await db.query("SELECT orders.*, address, in_work FROM orders LEFT JOIN buffer_addresses USING(buffer_address) WHERE provider IN('simpleswap', 'oswapcc') AND is_done=1 AND is_eligible=1 AND is_compensated=0");
 	for (let order of orders) {
 		const compensation_amount_in_bytes = Math.floor(order.compensation * 1e9);
 		const unit = await dag.sendPayment({ to_address: order.buffer_address, amount: compensation_amount_in_bytes });
