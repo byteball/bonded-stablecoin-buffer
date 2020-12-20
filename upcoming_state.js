@@ -6,6 +6,7 @@ const network = require('ocore/network.js');
 const eventBus = require('ocore/event_bus.js');
 const aa_state = require('aabot/aa_state.js');
 const dag = require('aabot/dag.js');
+const CurveAA = require('./curve.js');
 
 const _ = require('lodash');
 const WebSocket = require('ws');
@@ -112,14 +113,23 @@ async function onAAResponse(objAAResponse) {
 }
 
 async function startWatching() {
-	// watch all curve, governance, and deposit AAs
-	const base_aas = conf.curve_base_aas.concat(conf.governance_base_aas).concat([conf.deposit_base_aa]);
+	// watch all curve AAs
+	const curve_rows = await dag.getAAsByBaseAAs(conf.curve_base_aas);
+	for (let row of curve_rows) {
+		console.log(`will watch curve AA ${row.address}`);
+		await CurveAA.create(row.address);
+		watched_aas.push(row.address);
+	}
+
+	// watch all governance and deposit AAs
+	let base_aas = conf.governance_base_aas.concat([conf.deposit_base_aa]);
 	const rows = await dag.getAAsByBaseAAs(base_aas);
 	for (let row of rows) {
 		console.log(`will watch AA ${row.address}`);
 		await aa_state.followAA(row.address);
+		watched_aas.push(row.address);
 	}
-	watched_aas = rows.map(row => row.address);
+	base_aas = base_aas.concat(conf.curve_base_aas);
 
 	// watch for new AAs created based on base AAs
 	for (let base_aa of base_aas) {

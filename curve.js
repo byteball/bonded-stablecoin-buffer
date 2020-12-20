@@ -3,12 +3,15 @@
 const eventBus = require('ocore/event_bus.js');
 const db = require('ocore/db.js');
 const conf = require('ocore/conf.js');
+const mutex = require('ocore/mutex.js');
 const formulaEvaluation = require("ocore/formula/evaluation.js");
 const dag = require('aabot/dag.js');
 const aa_state = require('aabot/aa_state.js');
 const light_data_feeds = conf.bLight ? require('aabot/light_data_feeds.js') : null;
 
 const ORACLE_UPDATE_INTERVAL = 2 * 60 * 1000;
+
+let curves = {};
 
 class CurveAA {
 	#curve_aa;
@@ -23,6 +26,11 @@ class CurveAA {
 	}
 
 	static async create(curve_aa) {
+		const unlock = await mutex.lock('create_' + curve_aa);
+		if (curves[curve_aa]) {
+			unlock();
+			return curves[curve_aa];
+		}
 		const params = await dag.readAAParams(curve_aa);
 		const oracles = await dag.executeGetter(curve_aa, 'get_oracles');
 
@@ -32,7 +40,10 @@ class CurveAA {
 
 		await aa_state.followAA(curve_aa);
 
-		return new CurveAA(curve_aa, params, oracles);
+		const curveAA = new CurveAA(curve_aa, params, oracles);
+		curves[curve_aa] = curveAA;
+		unlock();
+		return curveAA;
 	}
 
 	async updateDataFeeds(bForce, bQuiet) {
