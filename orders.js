@@ -52,7 +52,7 @@ async function createOrder(order) {
 		throw Error(`input currency doesn't match ${order.currency_in} !== ${order_info.currency_from}`); 
 	if (order.provider !== 'oswapcc' && order.amount_in.toString() !== order_info.amount_from)
 		throw Error(`input amount doesn't match ${order.amount_in} !== ${order_info.amount_from}`); 
-	if (order.expected_amount_out.toString() !== order_info.amount_to)
+	if (order.expected_amount_out.toString() !== order_info.amount_to.toString())
 		throw Error(`output amount doesn't match ${order.expected_amount_out} !== ${order_info.amount_to}`);
 	let { fee, compensation } = await getFeeAndCompensation(parseFloat(order.amount_in), order.currency_in, parseFloat(order.expected_amount_out));
 	if (!is_eligible)
