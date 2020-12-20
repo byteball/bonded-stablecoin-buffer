@@ -35,7 +35,11 @@ const createExchange = async (in_amount, in_coin, out_address) => {
 	}
 
 	const data = await response.json()
-	return data
+	if (!data.data) {
+		console.error('-- no data in response', data)
+		throw new Error(`no data in response ${JSON.stringify(data)}`)
+	}
+	return data.data
 }
 
 const fetchExchangeInfo = async (id) => {
