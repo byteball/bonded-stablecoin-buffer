@@ -11,6 +11,7 @@ const conf = require('ocore/conf.js');
 const buffer = require('./buffer.js');
 const orders = require('./orders.js');
 const cryptocoinpro = require('./cryptocoinpro.js');
+const upcomingState = require('./upcoming_state.js');
 
 const app = new Koa();
 const router = new KoaRouter();
@@ -96,6 +97,16 @@ router.post('/create_fiat_redirect_url', async (ctx) => {
 		data: url,
 	};
 });
+
+
+router.get('/get_state', async (ctx) => {
+	console.error('get_state');
+	ctx.body = {
+		status: 'success',
+		data: await upcomingState.getCurrentState(),
+	};
+});
+
 
 app.use(cors());
 app.use(router.routes());

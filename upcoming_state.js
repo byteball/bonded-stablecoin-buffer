@@ -16,6 +16,9 @@ let wss;
 let state;
 let watched_aas = [];
 
+async function getCurrentState() {
+	return state || await getStateSnapshot();
+}
 
 async function getStateSnapshot() {
 	let state = { upcomingStateVars: {}, upcomingBalances: {} };
@@ -153,4 +156,5 @@ async function startWatching() {
 exports.startWatching = startWatching;
 exports.addWatchedAA = addWatchedAA;
 exports.updateState = updateState;
+exports.getCurrentState = getCurrentState;
 
