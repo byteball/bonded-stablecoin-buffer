@@ -78,8 +78,12 @@ function startWebsocketServer() {
 			return;
 		}
 		console.log('new websocket connect with headers', ws.upgradeReq.headers);
-		if (ws.upgradeReq.headers['x-real-ip'] && (ip === '127.0.0.1' || ip.match(/^192\.168\./) || ip.match(/^10\./))) // we are behind a proxy
-			ip = ws.upgradeReq.headers['x-real-ip'];
+		if (ip === '127.0.0.1' || ip.match(/^192\.168\./) || ip.match(/^10\./)) { // we are behind a proxy
+			if (ws.upgradeReq.headers['x-forwarded-for'])
+				ip = ws.upgradeReq.headers['x-forwarded-for'].split(', ')[0];
+			else if (ws.upgradeReq.headers['x-real-ip'])
+				ip = ws.upgradeReq.headers['x-real-ip'];
+		}
 		ws.peer = ip + ":" + ws.upgradeReq.connection.remotePort;
 		console.log('got connection from ' + ws.peer);
 		if (wss.clients.length >= conf.MAX_STATE_CONNECTIONS){
