@@ -109,7 +109,7 @@ router.get('/get_state', async (ctx) => {
 	};
 });
 
-router.get('/aa:address', async (ctx) => {
+router.get('/aa/:address', async (ctx) => {
 	console.error('aa', ctx.params);
 	const address = ctx.params.address;
 	if (!ValidationUtils.isValidAddress(address))
