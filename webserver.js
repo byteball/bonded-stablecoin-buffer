@@ -8,6 +8,8 @@ const bodyParser = require('koa-bodyparser');
 
 const ValidationUtils = require('ocore/validation_utils.js');
 const conf = require('ocore/conf.js');
+const storage = require('ocore/storage.js');
+const db = require('ocore/db.js');
 const buffer = require('./buffer.js');
 const orders = require('./orders.js');
 const cryptocoinpro = require('./cryptocoinpro.js');
@@ -104,6 +106,20 @@ router.get('/get_state', async (ctx) => {
 	ctx.body = {
 		status: 'success',
 		data: await upcomingState.getCurrentState(),
+	};
+});
+
+router.get('/aa:address', async (ctx) => {
+	console.error('aa', ctx.params);
+	const address = ctx.params.address;
+	if (!ValidationUtils.isValidAddress(address))
+		return setError(ctx, "invalid AA address");
+	const { arrDefinition } = await storage.readAADefinition(db, address);
+	if (!arrDefinition)
+		return setError(ctx, "not tracking this AA: " + address);
+	ctx.body = {
+		status: 'success',
+		data: arrDefinition,
 	};
 });
 
