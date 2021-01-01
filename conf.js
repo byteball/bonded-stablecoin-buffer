@@ -38,6 +38,10 @@ exports.arb_base_aas = ['7DTJZNB3MHSBVI72CKXRIKONJYBV7I2Z', 'WQBLYBRAMJVXDWS7BGT
 exports.governance_base_aas = ['Y4VBXMROK5BWBKSYYAMUW7QUEZFXYBCF', 'UUPBIWDWQ7Q4WXS5CWSEKUQE34FG6L55'];
 exports.deposit_base_aa = 'GEZGVY4T3LK6N4NJAKNHNQIVAI5OYHPC';
 
+exports.factory_aas = ['B7RBGEW7FEASSWNTOQSDQXIKG56EJAFP', 'SAG5CJZAUSEYOEFN7FJTC23F5ZGNUR37'];
+
+exports.token_registry_aa = "O6H6ZIFI57X3PLTYHOCVYPP5A553CYFQ";
+
 exports.webPort = process.env.testnet ? 8081 : 8080;
 exports.wsPort = process.env.testnet ? 8091 : 8090;
 

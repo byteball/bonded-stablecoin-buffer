@@ -14,6 +14,7 @@ const buffer = require('./buffer.js');
 const orders = require('./orders.js');
 const cryptocoinpro = require('./cryptocoinpro.js');
 const upcomingState = require('./upcoming_state.js');
+const dag = require('aabot/dag.js');
 
 const app = new Koa();
 const router = new KoaRouter();
@@ -107,6 +108,48 @@ router.get('/get_state', async (ctx) => {
 		status: 'success',
 		data: await upcomingState.getCurrentState(),
 	};
+});
+
+router.get('/get_state/:address', async (ctx) => {
+	const address = ctx.params.address;
+	if (!ValidationUtils.isValidAddress(address))
+		return setError(ctx, "invalid AA address");
+	const state_vars = await dag.readAAStateVars(address, "");
+	ctx.body = {
+		status: 'success',
+		data: state_vars,
+	};
+});
+
+router.get('/get_factory_state', async (ctx) => {
+	const state_vars_array = await Promise.all(conf.factory_aas.map((address) => dag.readAAStateVars(address, "")));
+	const state_vars = state_vars_array.reduce((total, currentValue) => {
+		return Object.assign(total, currentValue)
+	}, {});
+	ctx.body = {
+		status: 'success',
+		data: state_vars,
+	};
+});
+
+router.get('/symbol/:asset?', async (ctx) => {
+	const asset = ctx.params.asset && decodeURIComponent(ctx.params.asset);
+	if (!asset) {
+		return setError(ctx, "Asset is a required parameter!");
+	}
+	if (asset === 'base') {
+		ctx.body = {
+			status: 'success',
+			data: "GBYTE",
+		};
+	} else {
+		const token_registry_state = await dag.readAAStateVars(conf.token_registry_aa, "a2s_" + asset);
+		const symbol = `a2s_${asset}` in token_registry_state ? token_registry_state[`a2s_${asset}`] : asset.replace(/[+=]/, '').substr(0, 6);
+		ctx.body = {
+			status: 'success',
+			data: symbol,
+		};
+	}
 });
 
 router.get('/aa/:address', async (ctx) => {
