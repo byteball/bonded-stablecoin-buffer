@@ -143,7 +143,7 @@ router.get('/symbol/:asset?', async (ctx) => {
 			data: "GBYTE",
 		};
 	} else {
-		const token_registry_state = await dag.readAAStateVars(conf.token_registry_aa, "a2s_" + asset);
+		const token_registry_state = await dag.readAAStateVars(conf.token_registry_aa, `a2s_${asset}`);
 		const symbol = `a2s_${asset}` in token_registry_state ? token_registry_state[`a2s_${asset}`] : asset.replace(/[+=]/, '').substr(0, 6);
 		ctx.body = {
 			status: 'success',
