@@ -86,7 +86,7 @@ router.post('/create_order', async (ctx) => {
 });
 
 router.post('/create_fiat_redirect_url', async (ctx) => {
-	const data = ctx.request.data;
+	const data = ctx.request.body;
 	console.error('create_fiat_redirect_url ctx', JSON.stringify(ctx, null, 2));
 	console.error('create_fiat_redirect_url', data);
 	const err = cryptocoinpro.getRequestError(data);
