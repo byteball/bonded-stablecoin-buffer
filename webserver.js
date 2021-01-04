@@ -114,11 +114,15 @@ router.get('/get_state/:address', async (ctx) => {
 	const address = ctx.params.address;
 	if (!ValidationUtils.isValidAddress(address))
 		return setError(ctx, "invalid AA address");
-	const state_vars = await dag.readAAStateVars(address, "");
-	ctx.body = {
-		status: 'success',
-		data: state_vars,
-	};
+	try {
+		const state_vars = await dag.readAAStateVars(address, "");
+		ctx.body = {
+			status: 'success',
+			data: state_vars,
+		};
+	} catch (err) {
+		setError(ctx, err);
+	}
 });
 
 router.get('/get_factory_state', async (ctx) => {
@@ -143,12 +147,34 @@ router.get('/symbol/:asset?', async (ctx) => {
 			data: "GBYTE",
 		};
 	} else {
-		const token_registry_state = await dag.readAAStateVars(conf.token_registry_aa, `a2s_${asset}`);
-		const symbol = `a2s_${asset}` in token_registry_state ? token_registry_state[`a2s_${asset}`] : asset.replace(/[+=]/, '').substr(0, 6);
+		try {
+			const token_registry_state = await dag.readAAStateVars(conf.token_registry_aa, `a2s_${asset}`);
+			const symbol = `a2s_${asset}` in token_registry_state ? token_registry_state[`a2s_${asset}`] : asset.replace(/[+=]/, '').substr(0, 6);
+			ctx.body = {
+				status: 'success',
+				data: symbol,
+			};
+		} catch (err) {
+			setError(ctx, err);
+		}
+	}
+});
+
+router.get('/get_data_feed/:oracle/:feed_name', async (ctx) => {
+	const oracle = ctx.params.oracle;
+	const feed_name = ctx.params.feed_name;
+	if (!ValidationUtils.isValidAddress(oracle))
+		return setError(ctx, "invalid oracle");
+	if (!feed_name)
+		return setError(ctx, "feed_name is require!");
+	try {
+		const data = await dag.getDataFeed(oracle, feed_name);
 		ctx.body = {
 			status: 'success',
-			data: symbol,
+			data: data,
 		};
+	} catch (err) {
+		setError(ctx, err);
 	}
 });
 
