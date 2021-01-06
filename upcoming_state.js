@@ -146,8 +146,17 @@ async function startWatching() {
 	}
 	eventBus.on("aa_definition_applied", async (address, definition) => {
 		let base_aa = definition[1].base_aa;
-		if (base_aas.includes(base_aa))
-			await addWatchedAA(base_aa);
+		if (base_aas.includes(base_aa)) {
+			if (conf.curve_base_aas.includes(base_aa)) {
+				console.log(`will watch new curve AA ${address}`);
+				await CurveAA.create(address);
+			}
+			else {
+				console.log(`will watch new non-curve AA ${address}`);
+				await aa_state.followAA(address);
+			}
+			await addWatchedAA(address);
+		}
 	});
 
 	eventBus.on("aa_request_applied", onAARequest);
