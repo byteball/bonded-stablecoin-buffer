@@ -159,6 +159,13 @@ async function startWatching() {
 		}
 	});
 
+	// watch factory AAs
+	for (let factory_aa of conf.factory_aas) {
+		console.log(`will watch factory AA ${factory_aa}`);
+		await aa_state.followAA(factory_aa);
+		watched_aas.push(factory_aa);
+	}
+
 	eventBus.on("aa_request_applied", onAARequest);
 	eventBus.on("aa_response_applied", onAAResponse);
 
