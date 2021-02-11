@@ -50,7 +50,7 @@ async function createOrder(order) {
 		throw Error(`dest address doesn't match ${order.buffer_address} !== ${order_info.address_to}`); 
 	if (order.currency_in !== order_info.currency_from.toUpperCase())
 		throw Error(`input currency doesn't match ${order.currency_in} !== ${order_info.currency_from}`); 
-	if (order.amount_in.toString() !== order_info.amount_from)
+	if (order.amount_in.toString() !== order_info.amount_from.toString())
 		throw Error(`input amount doesn't match ${order.amount_in} !== ${order_info.amount_from}`); 
 	if (order.expected_amount_out.toString() !== order_info.amount_to.toString())
 		throw Error(`output amount doesn't match ${order.expected_amount_out} !== ${order_info.amount_to}`);
