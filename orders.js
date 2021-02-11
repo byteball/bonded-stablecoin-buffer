@@ -21,8 +21,8 @@ function addFields(provider, order_info) {
 	if (provider === 'oswapcc') {
 		order_info.address_to = order_info.out_address;
 		order_info.currency_from = order_info.in_coin;
-		order_info.amount_from = order_info.in_amount;
-		order_info.amount_to = order_info.expected_out_amount;
+		order_info.amount_from = order_info.in_amount || order_info.expected_in_amount;
+		order_info.amount_to = order_info.out_amount || order_info.expected_out_amount;
 	}
 }
 
@@ -50,7 +50,7 @@ async function createOrder(order) {
 		throw Error(`dest address doesn't match ${order.buffer_address} !== ${order_info.address_to}`); 
 	if (order.currency_in !== order_info.currency_from.toUpperCase())
 		throw Error(`input currency doesn't match ${order.currency_in} !== ${order_info.currency_from}`); 
-	if (order.provider !== 'oswapcc' && order.amount_in.toString() !== order_info.amount_from)
+	if (order.amount_in.toString() !== order_info.amount_from)
 		throw Error(`input amount doesn't match ${order.amount_in} !== ${order_info.amount_from}`); 
 	if (order.expected_amount_out.toString() !== order_info.amount_to.toString())
 		throw Error(`output amount doesn't match ${order.expected_amount_out} !== ${order_info.amount_to}`);
