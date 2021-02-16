@@ -42,6 +42,7 @@
 							tokens2_to: `{params.address}`,
 							max_fee_percent: `{$max_fee_percent}`,
 							tokens2: `{$tokens2}`,
+							ref: `{trigger.data.ref OTHERWISE ''}`,
 						}
 					},
 					{

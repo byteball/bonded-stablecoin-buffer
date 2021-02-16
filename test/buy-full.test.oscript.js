@@ -286,7 +286,7 @@ describe('Buy T2 through a buffer AA using one executions and get the remaining 
 		const tokens2 = .5e2
 		const { amount, fee, fee_percent } = this.buy(tokens1, tokens2)
 
-		const net_buffer_amount = this.buffer_amount + 1e4 - 866
+		const net_buffer_amount = this.buffer_amount + 1e4 - 866 - (3 + 32)
 		const remaining_buffer_amount = net_buffer_amount - amount - fee - 1000
 
 		const { unit, error } = await this.bob.triggerAaWithData({
@@ -295,6 +295,7 @@ describe('Buy T2 through a buffer AA using one executions and get the remaining 
 			data: {
 				execute: 1,
 				tokens2: tokens2,
+				ref: this.bobAddress,
 			},
 			spend_unconfirmed: 'all',
 		})
@@ -318,6 +319,12 @@ describe('Buy T2 through a buffer AA using one executions and get the remaining 
 			address: this.curve_aa,
 			amount: net_buffer_amount,
 		}])
+		expect(unitObj.messages.find(m => m.app === 'data').payload).to.deep.equal({
+			tokens2_to: this.aliceAddress,
+			max_fee_percent: '1.5',
+			tokens2,
+			ref: this.bobAddress,
+		})
 
 		// response of the curve AA
 		const { response: response2 } = await this.network.getAaResponseToUnit(response.response_unit)

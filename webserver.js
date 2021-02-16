@@ -31,18 +31,25 @@ function setError(ctx, error) {
 }
 
 router.get('/create_buffer', async (ctx) => {
-	console.error('create_buffer', ctx.query.address, ctx.query.curve_aa, ctx.request.method);
+	console.error('create_buffer', ctx.query.address, ctx.query.curve_aa, ctx.query.ref, ctx.request.method);
 	const address = ctx.query.address;
 	const curve_aa = ctx.query.curve_aa;
+	const referrer = ctx.query.ref;
 	if (!ValidationUtils.isValidAddress(address))
 		return setError(ctx, "invalid user address");
+	if (referrer) {
+		if (referrer === address)
+			return setError(ctx, "attempt to self-refer");
+		if (!ValidationUtils.isValidAddress(referrer))
+			return setError(ctx, "invalid referrer address");
+	}
 	const error = await buffer.validateCurveAA(curve_aa);
 	if (error)
 		return setError(ctx, "invalid curve: " + error);
 	try {
 		ctx.body = {
 			status: 'success',
-			data: await buffer.getOrCreateBufferAddress(address, curve_aa)
+			data: await buffer.getOrCreateBufferAddress(address, curve_aa, referrer)
 		};
 	}
 	catch (err) {

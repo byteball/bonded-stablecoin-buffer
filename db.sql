@@ -3,6 +3,7 @@ CREATE TABLE buffer_addresses (
 	address CHAR(32) NOT NULL,
 	curve_aa CHAR(32) NOT NULL,
 	definition TEXT NOT NULL,
+	referrer CHAR(32) NULL,
 	in_work TINYINT NOT NULL DEFAULT 1,
 	creation_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	last_update_date TIMESTAMP NULL
@@ -11,6 +12,9 @@ CREATE TABLE buffer_addresses (
 CREATE INDEX byInWork ON buffer_addresses(in_work);
 -- query separator
 CREATE UNIQUE INDEX byAddrCurve ON buffer_addresses(address, curve_aa);
+/*
+ALTER TABLE buffer_addresses ADD COLUMN referrer CHAR(32) NULL;
+*/
 -- query separator
 
 CREATE TABLE orders (

@@ -41,7 +41,7 @@ function getDefinition(address, curve_aa) {
 	}];
 }
 
-async function getOrCreateBufferAddress(address, curve_aa) {
+async function getOrCreateBufferAddress(address, curve_aa, referrer) {
 	const rows = await db.query("SELECT buffer_address, definition FROM buffer_addresses WHERE address=? AND curve_aa=?", [address, curve_aa]);
 	const row = rows[0];
 	if (row) {
@@ -58,9 +58,9 @@ async function getOrCreateBufferAddress(address, curve_aa) {
 		throw Error("failed to define new AA");
 	await db.query(
 		`INSERT ${db.getIgnore()} 
-		INTO buffer_addresses (buffer_address, address, curve_aa, definition, in_work, last_update_date)
-		VALUES (?, ?, ?, ?, 1, ${db.getNow()})`,
-		[buffer_address, address, curve_aa, JSON.stringify(definition)]
+		INTO buffer_addresses (buffer_address, address, curve_aa, definition, referrer, in_work, last_update_date)
+		VALUES (?, ?,?,?, ?, 1, ${db.getNow()})`,
+		[buffer_address, address, curve_aa, JSON.stringify(definition), referrer]
 	);
 	await addCurve(curve_aa);
 	await aa_state.followAA(buffer_address);
@@ -122,7 +122,16 @@ async function executePurchase(buffer_address, balance, curve_aa, arrDefinition)
 	const tokens2 = await curveAA.get_tokens2_amount(balance - 1000, params.max_fee_percent || 1);
 	if (tokens2 === 0)
 		return console.log("would receive 0 tokens2");
-	const unit = await dag.sendAARequest(buffer_address, { execute: 1, tokens2 });
+	
+	// add referrer if any
+	const buffer = await getBuffer(buffer_address);
+	if (!buffer)
+		throw Error("no buffer? " + buffer_address);
+	let req = { execute: 1, tokens2 };
+	if (buffer.referrer)
+		req.ref = buffer.referrer;
+	
+	const unit = await dag.sendAARequest(buffer_address, req);
 	if (!unit)
 		return console.log("failed to send AA request to " + buffer_address);
 	const objJoint = await dag.readJoint(unit);
@@ -224,7 +233,7 @@ async function onAARequest(objAARequest) {
 
 async function startWatching() {
 	await aa_addresses.readAADefinitions(conf.curve_base_aas);
-	await aa_addresses.readAADefinitions([conf.buffer_base_aa]);
+	await aa_addresses.readAADefinitions(conf.buffer_base_aas);
 	await aa_addresses.readAADefinitions(conf.arb_base_aas);
 	
 	eventBus.on("aa_request_applied", onAARequest);
