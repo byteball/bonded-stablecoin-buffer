@@ -129,8 +129,8 @@ async function startWatching() {
 		watched_aas.push(row.address);
 	}
 
-	// watch all governance and deposit AAs
-	let base_aas = conf.governance_base_aas.concat([conf.deposit_base_aa]);
+	// watch all governance, deposit, stable, SF, and DE AAs
+	let base_aas = conf.governance_base_aas.concat([conf.deposit_base_aa]).concat(conf.stable_base_aas).concat(conf.sf_base_aas).concat(conf.de_base_aas);
 	const rows = await dag.getAAsByBaseAAs(base_aas);
 	for (let row of rows) {
 		console.log(`will watch AA ${row.address}`);
