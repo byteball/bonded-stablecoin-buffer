@@ -342,6 +342,11 @@ describe('Buy T2 through a buffer AA using several partial executions', function
 			address: this.curve_aa,
 			amount: net_buffer_amount,
 		}])
+		expect(unitObj.messages.find(m => m.app === 'data').payload).to.deep.equal({
+			tokens2_to: this.aliceAddress,
+			max_fee_percent: '1.5',
+			tokens2,
+		})
 
 		// response of the curve AA
 		const { response: response2 } = await this.network.getAaResponseToUnit(response.response_unit)

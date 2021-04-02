@@ -129,8 +129,8 @@ async function startWatching() {
 		watched_aas.push(row.address);
 	}
 
-	// watch all governance and deposit AAs
-	let base_aas = conf.governance_base_aas.concat([conf.deposit_base_aa]);
+	// watch all governance, deposit, stable, SF, and DE AAs
+	let base_aas = conf.governance_base_aas.concat([conf.deposit_base_aa]).concat(conf.stable_base_aas).concat(conf.sf_base_aas).concat(conf.de_base_aas);
 	const rows = await dag.getAAsByBaseAAs(base_aas);
 	for (let row of rows) {
 		console.log(`will watch AA ${row.address}`);
@@ -146,9 +146,25 @@ async function startWatching() {
 	}
 	eventBus.on("aa_definition_applied", async (address, definition) => {
 		let base_aa = definition[1].base_aa;
-		if (base_aas.includes(base_aa))
-			await addWatchedAA(base_aa);
+		if (base_aas.includes(base_aa)) {
+			if (conf.curve_base_aas.includes(base_aa)) {
+				console.log(`will watch new curve AA ${address}`);
+				await CurveAA.create(address);
+			}
+			else {
+				console.log(`will watch new non-curve AA ${address}`);
+				await aa_state.followAA(address);
+			}
+			await addWatchedAA(address);
+		}
 	});
+
+	// watch factory AAs
+	for (let factory_aa of conf.factory_aas) {
+		console.log(`will watch factory AA ${factory_aa}`);
+		await aa_state.followAA(factory_aa);
+		watched_aas.push(factory_aa);
+	}
 
 	eventBus.on("aa_request_applied", onAARequest);
 	eventBus.on("aa_response_applied", onAAResponse);
