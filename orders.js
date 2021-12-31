@@ -66,7 +66,7 @@ async function createOrder(order) {
 }
 
 async function finishOrders(buffer_address) {
-	const orders = await db.query("SELECT * FROM orders WHERE provider IN('simpleswap', 'oswapcc') AND is_done=0 " + (buffer_address ? "AND buffer_address=" + db.escape(buffer_address) : ""));
+	const orders = await db.query("SELECT * FROM orders WHERE provider IN('simpleswap', 'oswapcc') AND is_done=0 " + (buffer_address ? "AND buffer_address=" + db.escape(buffer_address) : "") + " AND creation_date > " + db.addTime('-30 DAY'));
 	let count = 0;
 	for (let order of orders) {
 		let provider_api;
