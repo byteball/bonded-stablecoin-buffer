@@ -21,7 +21,8 @@
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^9.4.0",
     "mocha": "^6.2.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "sitemap": "^7.1.1"
   },
   "devDependencies": {
     "eslint": "^6.3.0",

@@ -5,6 +5,8 @@ const Koa = require('koa');
 const KoaRouter = require('koa-router');
 const cors = require('@koa/cors');
 const bodyParser = require('koa-bodyparser');
+const { createGzip } = require('zlib')
+const { SitemapStream, streamToPromise } = require('sitemap');
 
 const ValidationUtils = require('ocore/validation_utils.js');
 const conf = require('ocore/conf.js');
@@ -199,6 +201,41 @@ router.get('/aa/:address', async (ctx) => {
 	};
 });
 
+const langs = ["en", "zh", "es", "ru", "da"];
+
+router.get('/sitemap.xml', async (ctx) => {
+	try {
+		// Creates a sitemap object given the input configuration with URLs
+		const smStream = new SitemapStream({ hostname: 'https://ostable.org' })
+		const pipeline = smStream.pipe(createGzip())
+
+		const curve_rows = await dag.getAAsByBaseAAs(conf.curve_base_aas);
+
+		langs.forEach((lng) => {
+			smStream.write({ url: `/${lng === "en" ? "" : lng}`, changefreq: 'daily', priority: 1 });
+			
+			for (let row of curve_rows) {
+				smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/trade/${row.address}`, changefreq: 'daily', priority: 0.5 });
+			}
+
+			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/buy`, changefreq: 'monthly', priority: 0.5 });
+			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/create`, changefreq: 'monthly', priority: 0.2 });
+			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/how-it-works`, changefreq: 'monthly', priority: 1 });
+			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/faq`, changefreq: 'monthly', priority: 1 });
+		});
+
+		smStream.end();
+
+		ctx.set('Content-Type', 'application/xml');
+		ctx.set('Content-Encoding', 'gzip');
+
+		ctx.body = await streamToPromise(pipeline);
+	} catch (err) {
+		console.error('sitemap error', err);
+		ctx.status = 500;
+		setError(ctx, err);
+	}
+});
 
 app.use(cors());
 app.use(router.routes());
