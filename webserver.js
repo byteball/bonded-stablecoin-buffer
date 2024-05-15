@@ -5,7 +5,6 @@ const Koa = require('koa');
 const KoaRouter = require('koa-router');
 const cors = require('@koa/cors');
 const bodyParser = require('koa-bodyparser');
-const { createGzip } = require('zlib')
 const { SitemapStream, streamToPromise } = require('sitemap');
 
 const ValidationUtils = require('ocore/validation_utils.js');
@@ -206,9 +205,8 @@ const langs = ["en", "zh", "es", "ru", "da"];
 router.get('/sitemap.xml', async (ctx) => {
 	try {
 		// Creates a sitemap object given the input configuration with URLs
-		const smStream = new SitemapStream({ hostname: 'https://ostable.org' })
-		const pipeline = smStream.pipe(createGzip())
-
+		const smStream = new SitemapStream({ hostname: 'https://ostable.org' });
+		
 		const curve_rows = await dag.getAAsByBaseAAs(conf.curve_base_aas);
 
 		langs.forEach((lng) => {
@@ -227,9 +225,8 @@ router.get('/sitemap.xml', async (ctx) => {
 		smStream.end();
 
 		ctx.set('Content-Type', 'application/xml');
-		ctx.set('Content-Encoding', 'gzip');
 
-		ctx.body = await streamToPromise(pipeline);
+		ctx.body = await streamToPromise(smStream);
 	} catch (err) {
 		console.error('sitemap error', err);
 		ctx.status = 500;
