@@ -143,7 +143,7 @@ router.get('/get_factory_state', async (ctx) => {
 	};
 });
 
-router.get('/symbol/:asset?', async (ctx) => {
+router.get('/symbol/:asset*', async (ctx) => {
 	const asset = ctx.params.asset && decodeURIComponent(ctx.params.asset);
 	if (!asset) {
 		return setError(ctx, "Asset is a required parameter!");
