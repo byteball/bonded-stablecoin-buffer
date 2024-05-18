@@ -213,11 +213,11 @@ router.get('/sitemap.xml', async (ctx) => {
 			smStream.write({ url: `/${lng === "en" ? "" : lng}`, changefreq: 'daily', priority: 1 });
 			
 			for (let row of curve_rows) {
-				smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/trade/${row.address}`, changefreq: 'daily', priority: 0.5 });
+				smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/trade/${row.address}`, changefreq: 'daily', priority: 0.8 });
 			}
 
 			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/buy`, changefreq: 'monthly', priority: 0.5 });
-			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/create`, changefreq: 'monthly', priority: 0.2 });
+			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/create`, changefreq: 'monthly', priority: 0.5 });
 			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/how-it-works`, changefreq: 'monthly', priority: 1 });
 			smStream.write({ url: `${lng === "en" ? "" : `/${lng}`}/faq`, changefreq: 'monthly', priority: 1 });
 		});
