@@ -14,7 +14,7 @@ exports.bLight = true;
 
 exports.storage = 'sqlite';
 
-exports.hub = process.env.testnet ? 'obyte.org/bb-test' : 'obyte.org/bb';
+exports.hub = process.env.testnet ? 'testnet.obyte.org/bb' : 'obyte.org/bb';
 exports.deviceName = 'Buy bonded stablecoin bot';
 exports.permanent_pairing_secret = '*';
 exports.control_addresses = ['DEVICE ALLOWED TO CHAT'];
