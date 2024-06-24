@@ -205,7 +205,7 @@ const langs = ["en", "zh", "es", "ru", "da"];
 router.get('/sitemap.xml', async (ctx) => {
 	try {
 		// Creates a sitemap object given the input configuration with URLs
-		const smStream = new SitemapStream({ hostname: 'https://ostable.org' });
+		const smStream = new SitemapStream({ hostname: `https://${process.env.testnet ? 'testnet.' : ''}ostable.org` });
 		
 		const curve_rows = await dag.getAAsByBaseAAs(conf.curve_base_aas);
 
