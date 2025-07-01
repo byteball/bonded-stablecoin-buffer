@@ -70,21 +70,21 @@ function sendMessage(ws, obj) {
 
 function startWebsocketServer() {
 	wss = new WebSocketServer({ port: conf.wsPort });
-	wss.on('connection', async function(ws) {
-		let ip = ws.upgradeReq.connection.remoteAddress;
+	wss.on('connection', async function(ws, req) {
+		let ip = req.socket.remoteAddress;
 		if (!ip){
 			console.log("no ip in accepted connection");
 			ws.terminate();
 			return;
 		}
-		console.log('new websocket connect with headers', ws.upgradeReq.headers);
+		console.log('new websocket connect with headers', req.headers);
 		if (ip === '127.0.0.1' || ip.match(/^192\.168\./) || ip.match(/^10\./)) { // we are behind a proxy
-			if (ws.upgradeReq.headers['x-forwarded-for'])
-				ip = ws.upgradeReq.headers['x-forwarded-for'].split(', ')[0];
-			else if (ws.upgradeReq.headers['x-real-ip'])
-				ip = ws.upgradeReq.headers['x-real-ip'];
+			if (req.headers['x-forwarded-for'])
+				ip = req.headers['x-forwarded-for'].split(', ')[0];
+			else if (req.headers['x-real-ip'])
+				ip = req.headers['x-real-ip'];
 		}
-		ws.peer = ip + ":" + ws.upgradeReq.connection.remotePort;
+		ws.peer = ip + ":" + req.socket.remotePort;
 		console.log('got connection from ' + ws.peer);
 		if (wss.clients.length >= conf.MAX_STATE_CONNECTIONS){
 			console.log("inbound connections maxed out, rejecting new client " + ws.peer);
